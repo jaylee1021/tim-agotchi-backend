@@ -5,16 +5,10 @@ const userSchema = new mongoose.Schema({
     firstName: String,
     lastName: String,
     email: { type: String, required: true, unique: true },
-    jobTitle: String,
     birthdate: Date,
+    avatar: String,
     password: { type: String, required: true },
-    address: {
-        streetAddress: String,
-        city: String,
-        state: String,
-        zipCode: Number
-    },
-    number: String
+    timagotchis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Timagotchi' }]
 }, { timestamps: true });
 
 // create model
