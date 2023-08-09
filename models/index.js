@@ -3,9 +3,7 @@ const mongoose = require('mongoose');
 
 // import all models
 const User = require('./user');
-const Post = require('./post');
-const Product = require('./product');
-const Order = require('./order');
+
 
 console.log('mongo uri =>', process.env.MONGO_URI);
 
