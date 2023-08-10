@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema({
     birthdate: Date,
     avatar: String,
     password: { type: String, required: true },
-    timagotchis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Timagotchi' }]
 }, { timestamps: true });
 
 // create model
