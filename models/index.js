@@ -28,7 +28,8 @@ db.on('error', (err) => {
 
 module.exports = {
     User,
-    Post,
-    Product,
-    Order
+    Timagotchi,
+    Food,
+    Mood,
+    Happy
 }
