@@ -5,8 +5,65 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
+const cron = require('node-cron');
 const { JWT_SECRET } = process.env;
 const { Timagotchi } = require('../models');
+
+//decreasing food and mood value every second
+setInterval(async () => {
+    try {
+        const tims = await Timagotchi.find({});
+        for (i in tims) {
+            let tim = tims[i];
+            if (tim.food > 0) {
+                tim.food -= 0.0015;
+                await tim.save();
+            }
+            if (tim.mood > 0) {
+                tim.mood -= 0.0015;
+                await tim.save();
+            }
+        }
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+}, 1000); 
+
+//friendship status changing based on food and mood status 
+setInterval(async () => {
+    try {
+        const tims = await Timagotchi.find({});
+        for (i in tims) {
+            let tim = tims[i];
+            if (tim.food > 50 && tim.mood > 50) {
+                tim.friendship.value += 0.00125;
+                await tim.save();
+            } else {
+                tim.friendship.value -= 0.00125;
+                await tim.save();
+            }
+        }
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+}, 1000); 
+
+//checking if alive 
+setInterval(async () => {
+    try {
+        const tims = await Timagotchi.find({});
+        for (i in tims) {
+            let tim = tims[i];
+            if (tim.food === 0 && tim.mood === 0) {
+                tim.alive = false;
+            }
+        }
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+}, 1000 * 60 * 60 * 24); 
+
+//adding 1 to the age every 24 hours
 
 
 router.get('/', (req, res) => {
