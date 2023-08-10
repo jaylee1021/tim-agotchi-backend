@@ -8,12 +8,14 @@ const timagotchiSchema = new mongoose.Schema({
     gender: String,
     age: Number,
     friendship: {
-        value: { type: Number, default: 0 },
+        value: { type: Number, default: 30 },
         status: String
     },
-    food: { type: Number, default: 0 },
-    mood: { type: Number, default: 0 },
-    user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+    food: { type: Number, default: 50 },
+    mood: { type: Number, default: 50 },
+    user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    alive: { type: Boolean, default: true },
+
 }, { timestamps: true });
 
 

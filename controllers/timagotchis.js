@@ -9,7 +9,6 @@ const { JWT_SECRET } = process.env;
 const { Timagotchi } = require('../models');
 
 
-
 router.get('/', (req, res) => {
     Timagotchi.find({})
         .then(timagotchis => {
