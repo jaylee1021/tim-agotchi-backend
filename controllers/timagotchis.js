@@ -122,8 +122,10 @@ router.put('/:id', async (req, res) => {
             timagotchi: updatedTimagotchi
         });
     } catch (error) {
+
         console.log('Error inside PUT /timagotchis/:id', error);
         return res.status(500).json({ message: 'Error occurred, please try again.' });
+        
     }
 });
 
