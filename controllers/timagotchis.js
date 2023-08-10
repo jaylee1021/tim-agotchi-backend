@@ -64,8 +64,27 @@ setInterval(async () => {
 }, 1000 * 60 * 60 * 24); 
 
 //adding 1 to the age every 24 hours
+const addToAge = async () => {
+    try {
+        const tims = await Timagotchi.find({});
+        for (i in tims) {
+            let tim = tims[i];
+            if (tim.alive) {
+                tim.age += 1;
+                await tim.save();
+            }
+        }
+    } catch (error) {
+        console.error('Error increasing value:', error);
+    }
+};
 
 
+cron.schedule('0 1 * * *', () => {
+    addToAge();
+});
+
+//get all tims route
 router.get('/', (req, res) => {
     Timagotchi.find({})
         .then(timagotchis => {
@@ -78,6 +97,7 @@ router.get('/', (req, res) => {
         });
 });
 
+//get all timagotchis for a specific user
 router.get('/my-timagotchis', async (req, res) => {
     try {
         const currentUser = req.query.userIds; 
@@ -89,6 +109,7 @@ router.get('/my-timagotchis', async (req, res) => {
     }
 });
 
+//get a tim by userId and timId
 router.get('/:userId/:timId', (req, res) => {
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
@@ -104,6 +125,7 @@ router.get('/:userId/:timId', (req, res) => {
         });
 });
 
+//create a new timagotchi
 router.post('/new', (req, res) => {
     let image;
     console.log('data from request', req.body);
@@ -137,6 +159,7 @@ router.post('/new', (req, res) => {
     });
 })
 
+//delete a timagotchi
 router.delete('/:id', (req, res) => {
     Timagotchi.findByIdAndDelete(req.params.id)
         .then(timagotchi => {
@@ -152,6 +175,7 @@ router.delete('/:id', (req, res) => {
         });
 })
 
+//update a timagotchi's name
 router.put('/:id', async (req, res) => {
     try {
         const timagotchiId = req.params.id;
