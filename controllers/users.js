@@ -41,6 +41,21 @@ router.get('/:id', (req, res) => {
         });
 });
 
+router.get('/:field/:value', (req, res) => {
+    User.findOne({ [req.params.field]: req.params.value })
+        .then(user => {
+            if (user) {
+                return res.json({ user: user });
+            } else {
+                return res.json({ message: 'No User Found' });
+            }
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
+});
+
 router.post('/signup', (req, res) => {
     // POST - adding the new user to the database
     console.log('===> Inside of /signup');
