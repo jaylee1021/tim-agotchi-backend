@@ -29,5 +29,5 @@ db.on('error', (err) => {
 
 module.exports = {
     User,
-    Timagotchi,
-}
+    Timagotchi
+};
