@@ -51,6 +51,7 @@ router.post('/new', (req, res) => {
     .catch((error) => {
         console.log('error', error);
         return res.json({ message: 'error occured, please try again.' });
+        
     });
 })
 
