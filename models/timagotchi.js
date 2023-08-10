@@ -9,7 +9,7 @@ const timagotchiSchema = new mongoose.Schema({
     age: Number,
     friendship: {
         value: { type: Number, default: 30 },
-        status: String
+        status: { type: String, default: 'neutral'}
     },
     food: { type: Number, default: 50 },
     mood: { type: Number, default: 50 },
