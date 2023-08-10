@@ -14,7 +14,8 @@ const timagotchiSchema = new mongoose.Schema({
     food: { type: Number, default: 50 },
     mood: { type: Number, default: 50 },
     user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    alive: true
+    alive: { type: Boolean, default: true },
+
 }, { timestamps: true });
 
 
