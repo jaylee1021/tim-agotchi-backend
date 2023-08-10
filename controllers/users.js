@@ -55,14 +55,12 @@ router.post('/signup', (req, res) => {
             } else {
                 // Create a new user
                 const newUser = new User({
+                    email: req.body.email,
+                    password: req.body.password,
                     firstName: req.body.firstName,
                     lastName: req.body.lastName,
-                    email: req.body.email,
                     location: req.body.location,
                     birthdate: req.body.birthdate,
-                    avatar: req.body.avatar,
-                    number: req.body.number,
-                    password: req.body.password
                 });
 
                 // Salt and hash the password - before saving the user
