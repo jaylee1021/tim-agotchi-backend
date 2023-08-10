@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
     return res.json({ message: 'Welcome to my API' });
 });
 
-app.use('/posts', require('./controllers/posts'));
+
 app.use('/users', require('./controllers/users'));
 app.use('/timagotchis', require('./controllers/timagotchis'));
 

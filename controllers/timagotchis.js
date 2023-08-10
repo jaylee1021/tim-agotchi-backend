@@ -82,5 +82,20 @@ router.post('/new', (req, res) => {
     });
 })
 
+router.delete('/:id', (req, res) => {
+    Timagotchi.findByIdAndDelete(req.params.id)
+        .then(timagotchi => {
+            if (timagotchi) {
+                return res.json({ message: 'Timagotchi Deleted' });
+            } else {
+                return res.json({ message: 'No Timagotchi Found' });
+            }
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
+})
+
 
 module.exports = router;
