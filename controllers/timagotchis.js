@@ -98,5 +98,33 @@ router.delete('/:id', (req, res) => {
         });
 })
 
+router.put('/:id', async (req, res) => {
+    try {
+        const timagotchiId = req.params.id;
+        const newName = req.body.name;
+
+        if (!newName) {
+            return res.status(400).json({ message: 'New name is required.' });
+        }
+
+        const updatedTimagotchi = await Timagotchi.findByIdAndUpdate(
+            timagotchiId,
+            { name: newName },
+            { new: true }
+        );
+
+        if (!updatedTimagotchi) {
+            return res.status(404).json({ message: 'Timagotchi not found.' });
+        }
+
+        return res.json({
+            message: 'Timagotchi updated successfully.',
+            timagotchi: updatedTimagotchi
+        });
+    } catch (error) {
+        console.log('Error inside PUT /timagotchis/:id', error);
+        return res.status(500).json({ message: 'Error occurred, please try again.' });
+    }
+});
 
 module.exports = router;
