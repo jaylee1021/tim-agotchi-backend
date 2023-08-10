@@ -12,30 +12,28 @@ const { Timagotchi } = require('../models');
 router.get('/', (req, res) => {
     Timagotchi.find({})
         .then(timagotchis => {
-            console.log('timagotchis', timagotchis); 
-            res.header("Access-Control-Allow-Origin", "*");
-            res.json(timagotchis)
+            console.log('timagotchis', timagotchis);
+            return res.json(timagotchis);
         })
-        .catch(err => console.log(err))
-        res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });   
-}); 
+        .catch(err => {
+            console.error('Error fetching timagotchis:', err);
+            return res.status(500).json({ message: 'There was an issue fetching timagotchis, please try again...' });
+        });
+});
 
 router.get('/my-timagotchis', async (req, res) => {
     try {
-
-        const currentUser = req.query.userIds;
-        const timagotchi = await Timagotchi.find({ user: { $in: currentUser } })
-        res.json({ timagotchi });
-
+        const currentUser = req.query.userIds; 
+        const timagotchis = await Timagotchi.find({ user: { $in: currentUser } });
+        return res.json({ timagotchis });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error' });
     }
 });
 
 router.get('/:userId/:timId', (req, res) => {
-    Timagotchi.find({ user: req.params.userId, id: req.params.timId })
+    Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
             if (timagotchi) {
                 return res.json({ timagotchi: timagotchi });
@@ -47,7 +45,7 @@ router.get('/:userId/:timId', (req, res) => {
             console.log('error', error);
             return res.json({ message: 'There was an issue, please try again' });
         });
-})
+});
 
 router.post('/new', (req, res) => {
     let image;
@@ -97,5 +95,35 @@ router.delete('/:id', (req, res) => {
         });
 })
 
+router.put('/:id', async (req, res) => {
+    try {
+        const timagotchiId = req.params.id;
+        const newName = req.body.name;
+
+        if (!newName) {
+            return res.status(400).json({ message: 'New name is required.' });
+        }
+
+        const updatedTimagotchi = await Timagotchi.findByIdAndUpdate(
+            timagotchiId,
+            { name: newName },
+            { new: true }
+        );
+
+        if (!updatedTimagotchi) {
+            return res.status(404).json({ message: 'Timagotchi not found.' });
+        }
+
+        return res.json({
+            message: 'Timagotchi updated successfully.',
+            timagotchi: updatedTimagotchi
+        });
+    } catch (error) {
+
+        console.log('Error inside PUT /timagotchis/:id', error);
+        return res.status(500).json({ message: 'Error occurred, please try again.' });
+
+    }
+});
 
 module.exports = router;
