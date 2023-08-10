@@ -79,7 +79,6 @@ const addToAge = async () => {
     }
 };
 
-
 cron.schedule('0 1 * * *', () => {
     addToAge();
 });
@@ -206,5 +205,49 @@ router.put('/:id', async (req, res) => {
 
     }
 });
+
+router.put('/feed/:userId/:timId', async (req, res) => {
+    Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
+        .then(timagotchi => {
+            if (timagotchi) {
+                if (timagotchi.food < 100) {
+                    timagotchi.food += 20;
+                    timagotchi.save();
+                    return res.json({ timagotchi: timagotchi });
+                } else {
+                    return res.json({ message: `${timagotchi.name} is full` });
+                }
+            } else {
+                return res.json({ message: 'No Timagotchi Found' });
+            }
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
+
+})
+
+router.put('/play/:userId/:timId', async (req, res) => {
+    Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
+        .then(timagotchi => {
+            if (timagotchi) {
+                if (timagotchi.mood < 100) {
+                    timagotchi.mood += 20;
+                    timagotchi.save();
+                    return res.json({ timagotchi: timagotchi });
+                } else {
+                    return res.json({ message: `${timagotchi.name} is overflowing with joy!` });
+                }
+            } else {
+                return res.json({ message: 'No Timagotchi Found' });
+            }
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
+
+})
 
 module.exports = router;
