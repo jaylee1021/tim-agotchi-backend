@@ -56,10 +56,10 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food > 50 && tim.mood > 50 && tim.friendship.value < 100) {
+            if (tim.food > 50 && tim.mood > 50 && tim.friendship.value <= 100) {
                 tim.friendship.value += 0.00125;
                 await tim.save();
-            } else if (tim.food < 50 && tim.mood < 50 && tim.friendship.value < 100) {
+            } else if (tim.food < 50 && tim.mood < 50 && tim.friendship.value <= 100) {
                 tim.friendship.value -= 0.00125;
                 await tim.save();
             }
@@ -78,12 +78,13 @@ setInterval(async () => {
             let tim = tims[i];
             if (tim.food === 0 && tim.mood === 0) {
                 tim.alive = false;
+                tim.image = 'https://i.imgur.com/2En7QUb.png'
             }
         }
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000 * 60 * 60 * 24); 
+}, 1000 * 60 * 60); 
 
 //adding 1 to the age every 24 hours
 const addToAge = async () => {
