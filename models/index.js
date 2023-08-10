@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 // import all models
 const User = require('./user');
+const Timagotchi = require('./timagotchi');
 
 
 console.log('mongo uri =>', process.env.MONGO_URI);
@@ -30,6 +31,5 @@ module.exports = {
     User,
     Timagotchi,
     Food,
-    Mood,
-    Happy
+    Mood
 }
