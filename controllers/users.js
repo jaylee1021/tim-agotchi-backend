@@ -150,7 +150,7 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), (req, re
     // console.log('entering delete route', req.params.id);
     User.findByIdAndDelete(req.params.id)
         .then(user => {
-            return res.json({ message: `${user.username} was deleted` });
+            return res.json({ message: `${user.email} was deleted` });
         })
         .catch(error => {
             console.log('error', error);
