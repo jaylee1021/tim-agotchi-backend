@@ -17,6 +17,7 @@ app.get('/', (req, res) => {
 
 app.use('/posts', require('./controllers/posts'));
 app.use('/users', require('./controllers/users'));
+app.use('/timagotchis', require('./controllers/timagotchis'));
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
