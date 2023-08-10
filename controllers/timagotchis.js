@@ -9,6 +9,27 @@ const cron = require('node-cron');
 const { JWT_SECRET } = process.env;
 const { Timagotchi } = require('../models');
 
+//----------------------FUNCTIONS----------------------//
+
+//checking friendship status
+function checkFriendship(tim) {
+    if (tim.type === 'Cat' && tim.friendship.value >= 80) {
+        tim.friendship.status = 'Best Friends';
+        tim.image = 'https://i.imgur.com/PM51tMH.png';
+    } else if (tim.type === 'Cat' && tim.friendship.value <= 20) {
+        tim.friendship.staus = 'Enemies';
+        tim.image = 'https://i.imgur.com/kVqOjbT.png'
+    } else if (tim.type === 'Dog' && tim.friendship.value >= 80) {
+        tim.friendship.status = 'Best Friends';
+        tim.image = 'https://i.imgur.com/FZucWaU.png';
+    } else if (tim.type === 'Dog' && tim.friendship.value <= 20) {
+        tim.friendship.status = 'Enemies';
+        tim.image = 'https://i.imgur.com/UkKFw6e.png';
+    }
+    tim.save();
+    return tim;
+}
+
 //decreasing food and mood value every second
 setInterval(async () => {
     try {
@@ -35,13 +56,14 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food > 50 && tim.mood > 50) {
+            if (tim.food > 50 && tim.mood > 50 && tim.friendship.value < 100) {
                 tim.friendship.value += 0.00125;
                 await tim.save();
-            } else {
+            } else if (tim.food < 50 && tim.mood < 50 && tim.friendship.value < 100) {
                 tim.friendship.value -= 0.00125;
                 await tim.save();
             }
+            checkFriendship(tim);
         }
     } catch (error) {
         console.error('Error updating value:', error);
@@ -82,6 +104,9 @@ const addToAge = async () => {
 cron.schedule('0 1 * * *', () => {
     addToAge();
 });
+
+
+//----------------------ROUTES----------------------//
 
 //get all tims route
 router.get('/', (req, res) => {
@@ -138,14 +163,7 @@ router.post('/new', (req, res) => {
         image: image,
         type: req.body.type,
         gender: req.body.gender,
-        age: 0,
-        friendship: {
-            value: 30,
-            status: 'neutral'
-        },
-        food: 50,
-        mood: 50,
-        user: req.body.user
+        user: req.body.user,
     })
     .then((newTimagotchi) => {
         console.log('new Timagotchi created =>', newTimagotchi);
