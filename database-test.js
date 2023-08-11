@@ -118,7 +118,7 @@ db.on('error', (err) => {
 //     if (post) {
 //         // find the comment by the id and remove
 //         post.comments.id('6493d5195db1f2b5fe7392b6').deleteOne()
-        
+
 //         post.save()
 //         .then(result => {
 //             console.log('removed comment', result);
@@ -131,31 +131,57 @@ db.on('error', (err) => {
 // .catch(error => console.log('error', error));
 
 // create a new order
-Order.create({
-    buyer: 'Issac',
-    trackingNumber: '384939xciosd02392',
-})
-.then(order => {
-    console.log('new order', order);
-    // add products to order
-    order.products.push('649747b45845267e021fedce', '649747b45845267e021fedc9');
-    // save the order
-    order.save()
-    .then(updatedOrder => {
-        console.log('order updated', updatedOrder);
-        // print the actual product inside order
-        updatedOrder.populate('products')
-        .then(result => {
-            console.log('order with products', result);
-        })
-        .catch(error => {
-            console.log(error);
-        })
-    })
-    .catch(error => {
-        console.log(error);
-    })
-})
-.catch(error => {
-    console.log(error);
-})
+// Order.create({
+//     buyer: 'Issac',
+//     trackingNumber: '384939xciosd02392',
+// })
+//     .then(order => {
+//         console.log('new order', order);
+//         // add products to order
+//         order.products.push('649747b45845267e021fedce', '649747b45845267e021fedc9');
+//         // save the order
+//         order.save()
+//             .then(updatedOrder => {
+//                 console.log('order updated', updatedOrder);
+//                 // print the actual product inside order
+//                 updatedOrder.populate('products')
+//                     .then(result => {
+//                         console.log('order with products', result);
+//                     })
+//                     .catch(error => {
+//                         console.log(error);
+//                     });
+//             })
+//             .catch(error => {
+//                 console.log(error);
+//             });
+//     })
+//     .catch(error => {
+//         console.log(error);
+//     });
+
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'timagotchi.app@gmail.com',
+        pass: 'rzpabckxygcmuqqn'  // app password from your gmail account
+    }
+});
+
+// async..await is not allowed in global scope, must use a wrapper
+async function main() {
+    // send mail with defined transport object
+    const info = await transporter.sendMail({
+        from: 'timagotchi.app@gmail.com', // sender address
+        to: "leejayjong@gmail.com, j.davila1641@gmail.com, timothy.samuel.pierce@gmail.com", // list of receivers
+        subject: "timagotchi test", // Subject line
+        text: "Testing notification", // plain text body
+        html: "<b>Test Test?</b>", // html body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+}
+
+main().catch(console.error);
