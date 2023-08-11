@@ -9,10 +9,16 @@ const timagotchiSchema = new mongoose.Schema({
     age: Number,
     friendship: {
         value: { type: Number, default: 30 },
-        status: { type: String, default: 'neutral'}
+        status: { type: String, default: 'Neutral'}
     },
-    food: { type: Number, default: 50 },
-    mood: { type: Number, default: 50 },
+    food: {
+        value: { type: Number, default: 50 },
+        status: { type: String, default: 'Hungry'}
+    },
+    mood: {
+        value: { type: Number, default: 50 },
+        status: { type: String, default: 'Bored' }
+    },
     user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     alive: { type: Boolean, default: true },
 
