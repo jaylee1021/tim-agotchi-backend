@@ -279,7 +279,7 @@ router.put('/feed/:userId/:timId', async (req, res) => {
         .then(timagotchi => {
             if (timagotchi) {
                 if (timagotchi.food < 100) {
-                    timagotchi.food += 20;
+                    timagotchi.food += 30;
                     evenOut(timagotchi);
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
@@ -308,7 +308,7 @@ router.put('/play/:userId/:timId', async (req, res) => {
         .then(timagotchi => {
             if (timagotchi) {
                 if (timagotchi.mood < 100) {
-                    timagotchi.mood += 20;
+                    timagotchi.mood += 30;
                     evenOut(timagotchi);
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
