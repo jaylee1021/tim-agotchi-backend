@@ -5,30 +5,14 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
+const rateLimit = require('express-rate-limit');
 const cron = require('node-cron');
 const { JWT_SECRET } = process.env;
 const { Timagotchi } = require('../models');
 
-//----------------------FUNCTIONS----------------------//
+const userAccess = {};
 
-//checking friendship status
-function checkFriendship(tim) {
-    if (tim.type === 'Cat' && tim.friendship.value >= 80) {
-        tim.friendship.status = 'Best Friends';
-        tim.image = 'https://i.imgur.com/PM51tMH.png';
-    } else if (tim.type === 'Cat' && tim.friendship.value <= 20) {
-        tim.friendship.staus = 'Enemies';
-        tim.image = 'https://i.imgur.com/kVqOjbT.png'
-    } else if (tim.type === 'Dog' && tim.friendship.value >= 80) {
-        tim.friendship.status = 'Best Friends';
-        tim.image = 'https://i.imgur.com/FZucWaU.png';
-    } else if (tim.type === 'Dog' && tim.friendship.value <= 20) {
-        tim.friendship.status = 'Enemies';
-        tim.image = 'https://i.imgur.com/UkKFw6e.png';
-    }
-    tim.save();
-    return tim;
-}
+//----------------------FUNCTIONS----------------------//
 
 //decreasing food and mood value every second
 setInterval(async () => {
@@ -37,11 +21,11 @@ setInterval(async () => {
         for (i in tims) {
             let tim = tims[i];
             if (tim.food > 0) {
-                tim.food -= 0.0015;
+                tim.food -= 0.00077;
                 await tim.save();
             }
             if (tim.mood > 0) {
-                tim.mood -= 0.0015;
+                tim.mood -= 0.00077;
                 await tim.save();
             }
         }
@@ -56,12 +40,20 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food > 50 && tim.mood > 50 && tim.friendship.value <= 100) {
-                tim.friendship.value += 0.00125;
+            if (tim.food > 50 && tim.friendship.value <= 100 || tim.mood > 50 && tim.friendship.value <= 100) {
+                tim.friendship.value += 0.000165; //If food or mood is above 50, friendship increases. Reaches full in 1 week
                 await tim.save();
-            } else if (tim.food < 50 && tim.mood < 50 && tim.friendship.value <= 100) {
-                tim.friendship.value -= 0.00125;
+                if (tim.friendship.value > 100) {
+                    tim.friendship.value = 100;
+                    await tim.save();
+                }
+            } else if (tim.food < 50 || tim.mood < 50) {
+                tim.friendship.value -= 0.00013;
                 await tim.save();
+                if (tim.friendship.value < 0) {
+                    tim.friendship.value = 0;
+                    await tim.save();
+                }
             }
             checkFriendship(tim);
         }
@@ -105,6 +97,57 @@ const addToAge = async () => {
 cron.schedule('0 1 * * *', () => {
     addToAge();
 });
+
+//checking friendship status
+function checkFriendship(tim) {
+    if (tim.type === 'Cat' && tim.friendship.value >= 80) {
+        tim.friendship.status = 'Best Friends';
+        tim.image = 'https://i.imgur.com/PM51tMH.png';
+    } else if (tim.type === 'Cat' && tim.friendship.value <= 20) {
+        tim.friendship.staus = 'Enemies';
+        tim.image = 'https://i.imgur.com/kVqOjbT.png'
+    } else if (tim.type === 'Dog' && tim.friendship.value >= 80) {
+        tim.friendship.status = 'Best Friends';
+        tim.image = 'https://i.imgur.com/FZucWaU.png';
+    } else if (tim.type === 'Dog' && tim.friendship.value <= 20) {
+        tim.friendship.status = 'Enemies';
+        tim.image = 'https://i.imgur.com/UkKFw6e.png';
+    }
+    tim.save();
+    return tim;
+}
+
+function evenOut(tim) {
+    if (tim.food < 0) {
+        tim.food = 0;
+    }
+    if (tim.mood < 0) {
+        tim.mood = 0;
+    }
+    if (tim.food > 100) {
+        tim.food = 100;
+    }
+    if (tim.mood > 100) {
+        tim.mood = 100;
+    }
+    return tim;
+}
+
+//limiting route access
+// const limiter = rateLimit({
+//     windowMs: 6 * 60 * 60 * 1000, // 6 hours in milliseconds
+//     max: 1, // Allow only 1 request every 6 hours
+//     message: 'Your Timagotchi is tired. Give it a break!',
+//     keyGenerator: (req) => {
+//         // Generate a unique key for each user based on IP address, userId, and timId
+//         return `${req.params.userId}:${req.params.timId}`;
+//     },
+//     handler: (req, res) => {
+//         // Handle rate limit exceeded
+//         res.status(429).json({ message: 'Your Timagotchi is tired. Give it a break!' });
+//     },
+// });
+
 
 
 //----------------------ROUTES----------------------//
@@ -226,11 +269,18 @@ router.put('/:id', async (req, res) => {
 });
 
 router.put('/feed/:userId/:timId', async (req, res) => {
+    // const userKey = `${req.params.userId}:${req.params.timId}`;
+
+    // if (userAccess[userKey] && Date.now() - userAccess[userKey] < 6 * 60 * 60 * 1000) {
+    //     return res.status(429).json({ message: 'You cannot feed the same Timagotchi within 6 hours.' });
+    // }
+
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
             if (timagotchi) {
                 if (timagotchi.food < 100) {
                     timagotchi.food += 20;
+                    evenOut(timagotchi);
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
@@ -248,11 +298,18 @@ router.put('/feed/:userId/:timId', async (req, res) => {
 })
 
 router.put('/play/:userId/:timId', async (req, res) => {
+    // const userKey = `${req.params.userId}:${req.params.timId}`;
+
+    // if (userAccess[userKey] && Date.now() - userAccess[userKey] < 6 * 60 * 60 * 1000) {
+    //     return res.status(429).json({ message: 'You cannot feed the same Timagotchi within 6 hours.' });
+    // }
+
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
             if (timagotchi) {
                 if (timagotchi.mood < 100) {
                     timagotchi.mood += 20;
+                    evenOut(timagotchi);
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
@@ -270,3 +327,4 @@ router.put('/play/:userId/:timId', async (req, res) => {
 })
 
 module.exports = router;
+
