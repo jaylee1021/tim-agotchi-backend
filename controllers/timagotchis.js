@@ -32,7 +32,7 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000); 
+}, 1000);
 
 //friendship status changing based on food and mood status 
 setInterval(async () => {
@@ -60,7 +60,7 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000); 
+}, 1000);
 
 //checking if alive 
 setInterval(async () => {
@@ -70,13 +70,13 @@ setInterval(async () => {
             let tim = tims[i];
             if (tim.food === 0 && tim.mood === 0) {
                 tim.alive = false;
-                tim.image = 'https://i.imgur.com/2En7QUb.png'
+                tim.image = 'https://i.imgur.com/2En7QUb.png';
             }
         }
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000 * 60 * 60); 
+}, 1000 * 60 * 60);
 
 //adding 1 to the age every 24 hours
 const addToAge = async () => {
@@ -168,7 +168,7 @@ router.get('/', (req, res) => {
 //get all timagotchis for a specific user
 router.get('/my-timagotchis', async (req, res) => {
     try {
-        const currentUser = req.query.userIds; 
+        const currentUser = req.query.userIds;
         const timagotchis = await Timagotchi.find({ user: { $in: currentUser } });
         return res.json({ timagotchis });
     } catch (err) {
@@ -209,16 +209,16 @@ router.post('/new', (req, res) => {
         gender: req.body.gender,
         user: req.body.user,
     })
-    .then((newTimagotchi) => {
-        console.log('new Timagotchi created =>', newTimagotchi);
-        return res.json({ timagotchi: newTimagotchi });
-    })
-    .catch((error) => {
-        console.log('error', error);
-        return res.json({ message: 'error occured, please try again.' });
+        .then((newTimagotchi) => {
+            console.log('new Timagotchi created =>', newTimagotchi);
+            return res.json({ timagotchi: newTimagotchi });
+        })
+        .catch((error) => {
+            console.log('error', error);
+            return res.json({ message: 'error occured, please try again.' });
 
-    });
-})
+        });
+});
 
 //delete a timagotchi
 router.delete('/:id', (req, res) => {
@@ -234,7 +234,7 @@ router.delete('/:id', (req, res) => {
             console.log('error', error);
             return res.json({ message: 'There was an issue, please try again' });
         });
-})
+});
 
 //update a timagotchi's name
 router.put('/:id', async (req, res) => {
@@ -295,7 +295,7 @@ router.put('/feed/:userId/:timId', async (req, res) => {
             return res.json({ message: 'There was an issue, please try again' });
         });
 
-})
+});
 
 router.put('/play/:userId/:timId', async (req, res) => {
     // const userKey = `${req.params.userId}:${req.params.timId}`;
@@ -324,7 +324,7 @@ router.put('/play/:userId/:timId', async (req, res) => {
             return res.json({ message: 'There was an issue, please try again' });
         });
 
-})
+});
 
 module.exports = router;
 
