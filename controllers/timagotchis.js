@@ -20,12 +20,12 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food > 0) {
-                tim.food -= 0.00077;
+            if (tim.food.value > 0) {
+                tim.food.value -= 0.00077;
                 await tim.save();
             }
-            if (tim.mood > 0) {
-                tim.mood -= 0.00077;
+            if (tim.mood.value > 0) {
+                tim.mood.value -= 0.00077;
                 await tim.save();
             }
         }
@@ -40,14 +40,14 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food > 50 && tim.friendship.value <= 100 || tim.mood > 50 && tim.friendship.value <= 100) {
+            if (tim.food.value > 50 && tim.friendship.value <= 100 || tim.mood.value > 50 && tim.friendship.value <= 100) {
                 tim.friendship.value += 0.000165; //If food or mood is above 50, friendship increases. Reaches full in 1 week
                 await tim.save();
                 if (tim.friendship.value > 100) {
                     tim.friendship.value = 100;
                     await tim.save();
                 }
-            } else if (tim.food < 50 || tim.mood < 50) {
+            } else if (tim.food.value < 50 || tim.mood.value < 50) {
                 tim.friendship.value -= 0.00013;
                 await tim.save();
                 if (tim.friendship.value < 0) {
@@ -68,7 +68,7 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food === 0 && tim.mood === 0) {
+            if (tim.food.value === 0 && tim.mood.value === 0) {
                 tim.alive = false;
                 tim.image = 'https://i.imgur.com/2En7QUb.png';
             }
@@ -77,6 +77,24 @@ setInterval(async () => {
         console.error('Error updating value:', error);
     }
 }, 1000 * 60 * 60);
+
+setInterval(async () => {
+    try {
+        const tims = await Timagotchi.find({});
+        for (i in tims) {
+            let tim = tims[i];
+            if (tim.food.status === "Full") {
+                tim.food.status = "Hungry";
+            } 
+            if (tim.mood.status === "Tired") {
+                tim.mood.status = "Bored"
+            }
+            tim.save();
+        }
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+}, 1000 * 60 * 60 * 6); 
 
 //adding 1 to the age every 24 hours
 const addToAge = async () => {
@@ -118,17 +136,17 @@ function checkFriendship(tim) {
 }
 
 function evenOut(tim) {
-    if (tim.food < 0) {
-        tim.food = 0;
+    if (tim.food.value < 0) {
+        tim.food.value = 0;
     }
-    if (tim.mood < 0) {
-        tim.mood = 0;
+    if (tim.mood.value < 0) {
+        tim.mood.value = 0;
     }
-    if (tim.food > 100) {
-        tim.food = 100;
+    if (tim.food.value > 100) {
+        tim.food.value = 100;
     }
-    if (tim.mood > 100) {
-        tim.mood = 100;
+    if (tim.mood.value > 100) {
+        tim.mood.value = 100;
     }
     return tim;
 }
@@ -236,6 +254,8 @@ router.delete('/:id', (req, res) => {
         });
 });
 
+
+
 //update a timagotchi's name
 router.put('/:id', async (req, res) => {
     try {
@@ -277,17 +297,19 @@ router.put('/feed/:userId/:timId', async (req, res) => {
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
-            if (timagotchi) {
-                if (timagotchi.food < 100) {
-                    timagotchi.food += 30;
+            if (timagotchi && timagotchi.food.status === 'Hungry') {
+                if (timagotchi.food.value < 100) {
+                    timagotchi.food.value += 30;
                     evenOut(timagotchi);
+                    timagotchi.food.status = 'Full'
+                    console.log('timagotchi', timagotchi.food.status);
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
                     return res.json({ message: `${timagotchi.name} is full` });
                 }
             } else {
-                return res.json({ message: 'No Timagotchi Found' });
+                return res.json({ message: `${timagotchi.name} is full` });
             }
         })
         .catch(error => {
@@ -306,17 +328,18 @@ router.put('/play/:userId/:timId', async (req, res) => {
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
-            if (timagotchi) {
-                if (timagotchi.mood < 100) {
-                    timagotchi.mood += 30;
+            if (timagotchi && timagotchi.mood.status === 'Bored') {
+                if (timagotchi.mood.value < 100) {
+                    timagotchi.mood.value += 30;
                     evenOut(timagotchi);
+                    timagotchi.mood.status = 'Tired'
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
-                    return res.json({ message: `${timagotchi.name} is overflowing with joy!` });
+                    return res.json({ message: `${timagotchi.name} is tuckered out!` });
                 }
             } else {
-                return res.json({ message: 'No Timagotchi Found' });
+                return res.json({ message: `${timagotchi.name} is tuckered out!` });
             }
         })
         .catch(error => {
