@@ -6,7 +6,7 @@ const timagotchiSchema = new mongoose.Schema({
     image: String,
     type: String,
     gender: String,
-    age: Number,
+    age: { type: Number, default: 0 },
     friendship: {
         value: { type: Number, default: 30 },
         status: { type: String, default: 'Neutral'}

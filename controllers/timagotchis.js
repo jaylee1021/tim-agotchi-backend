@@ -446,5 +446,20 @@ router.put('/clean/:userId/:timId', async (req, res) => {
 
 });
 
+router.put('/pooperscooper/:userId/:timId', async (req, res) => {
+
+    Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
+        .then(timagotchi => {
+            timagotchi.hasPooped = false;
+            timagotchi.save();
+            return res.json({ timagotchi: timagotchi });
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
+
+});
+
 module.exports = router;
 
