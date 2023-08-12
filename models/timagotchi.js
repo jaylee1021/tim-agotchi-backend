@@ -19,6 +19,11 @@ const timagotchiSchema = new mongoose.Schema({
         value: { type: Number, default: 50 },
         status: { type: String, default: 'Bored' }
     },
+    cleanliness: {
+        value: { type: Number, default: 80 },
+        status: { type: String, default: 'Clean' }
+    },
+    hasPooped: { type: Boolean, default: false },
     user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     alive: { type: Boolean, default: true },
 
