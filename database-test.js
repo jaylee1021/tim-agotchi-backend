@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { faker } = require('@faker-js/faker');
 const { createRandomUser } = require('./utils');
 
+
 // import our models
 const { User, Post, Order, Product } = require('./models');
 
@@ -160,28 +161,31 @@ db.on('error', (err) => {
 //         console.log(error);
 //     });
 
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
 
-const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: 'timagotchi.app@gmail.com',
-        pass: 'rzpabckxygcmuqqn'  // app password from your gmail account
-    }
-});
+// const transporter = nodemailer.createTransport({
+//     service: 'Gmail',
+//     auth: {
+//         user: 'timagotchi.app@gmail.com',
+//         pass: process.env.EMAIL_APP_PASSWORD  // app password from your gmail account
+//     }
+// });
 
-// async..await is not allowed in global scope, must use a wrapper
-async function main() {
-    // send mail with defined transport object
-    const info = await transporter.sendMail({
-        from: 'timagotchi.app@gmail.com', // sender address
-        to: "leejayjong@gmail.com, j.davila1641@gmail.com, timothy.samuel.pierce@gmail.com", // list of receivers
-        subject: "timagotchi test", // Subject line
-        text: "Testing notification", // plain text body
-        html: "<b>Test Test?</b>", // html body
-    });
+// // async..await is not allowed in global scope, must use a wrapper
+// function main(toEmail, subject, message) {
+//     // send mail with defined transport object
+//     const mailOptions = {
+//         from: 'timagotchi.app@gmail.com', // sender address
+//         to: 'leejayjong@gmail.com', // list of receivers
+//         subject: 'new test', // Subject line
+//         html: 'testing', // html body
+//     };
+//     transporter.sendMail(mailOptions, (error, info) => {
+//         if (error) {
+//             return console.log(error);
+//         }
+//         console.log("Message sent: %s", info.messageId);
+//     });
+// }
 
-    console.log("Message sent: %s", info.messageId);
-}
-
-main().catch(console.error);
+// main();
