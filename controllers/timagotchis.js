@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const rateLimit = require('express-rate-limit');
 const cron = require('node-cron');
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, EMAIL_APP_PASSWORD } = process.env;
 const { Timagotchi } = require('../models');
 
 const userAccess = {};
@@ -85,7 +85,7 @@ setInterval(async () => {
             let tim = tims[i];
             if (tim.food.status === "Full") {
                 tim.food.status = "Hungry";
-            } 
+            }
             if (tim.mood.status === "Tired") {
                 tim.mood.status = "Bored"
             }
@@ -94,7 +94,7 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000 * 60 * 60 * 6); 
+}, 1000 * 60);
 
 //adding 1 to the age every 24 hours
 const addToAge = async () => {
@@ -123,7 +123,7 @@ function checkFriendship(tim) {
         tim.image = 'https://i.imgur.com/PM51tMH.png';
     } else if (tim.type === 'Cat' && tim.friendship.value <= 20) {
         tim.friendship.staus = 'Enemies';
-        tim.image = 'https://i.imgur.com/kVqOjbT.png'
+        tim.image = 'https://i.imgur.com/kVqOjbT.png';
     } else if (tim.type === 'Dog' && tim.friendship.value >= 80) {
         tim.friendship.status = 'Best Friends';
         tim.image = 'https://i.imgur.com/FZucWaU.png';
@@ -166,7 +166,32 @@ function evenOut(tim) {
 //     },
 // });
 
+const nodemailer = require("nodemailer");
 
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'timagotchi.app@gmail.com',
+        pass: process.env.EMAIL_APP_PASSWORD  // app password from your gmail account
+    }
+});
+
+// async..await is not allowed in global scope, must use a wrapper
+function main(toEmail, subject, message) {
+    // send mail with defined transport object
+    const mailOptions = {
+        from: 'timagotchi.app@gmail.com', // sender address
+        to: toEmail, // list of receivers
+        subject: subject, // Subject line
+        html: message, // html body
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return console.log(error);
+        }
+        console.log("Message sent: %s", info.messageId);
+    });
+}
 
 //----------------------ROUTES----------------------//
 
@@ -184,15 +209,19 @@ router.get('/', (req, res) => {
 });
 
 //get all timagotchis for a specific user
-router.get('/my-timagotchis', async (req, res) => {
-    try {
-        const currentUser = req.query.userIds;
-        const timagotchis = await Timagotchi.find({ user: { $in: currentUser } });
-        return res.json({ timagotchis });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Server error' });
-    }
+router.get('/my-timagotchis/:userId', async (req, res) => {
+    Timagotchi.find({ user: req.params.userId })
+        .then(timagotchis => {
+            if (timagotchis) {
+                return res.json(timagotchis);
+            } else {
+                return res.json({ message: 'No Timagotchi Found' });
+            }
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
 });
 
 //get a tim by userId and timId
