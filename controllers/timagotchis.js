@@ -49,6 +49,7 @@ setInterval(async () => {
             let tim = tims[i];
             if (tim.food.value > 50 && tim.friendship.value <= 100 || tim.mood.value > 50 && tim.friendship.value <= 100 || tim.cleanliness.value > 50 && tim.friendship.value <= 100) {
                 tim.friendship.value += 0.000165; //If food or mood is above 50, friendship increases. Reaches full in 1 week
+                evenOut(tim);
                 await tim.save();
             } else if (tim.food.value < 50 || tim.mood.value < 50 || tim.cleanliness.value < 50) {
                 tim.friendship.value -= 0.00013;
