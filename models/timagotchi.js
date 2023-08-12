@@ -9,19 +9,19 @@ const timagotchiSchema = new mongoose.Schema({
     age: { type: Number, default: 0 },
     friendship: {
         value: { type: Number, default: 30 },
-        status: { type: String, default: 'Neutral'}
+        status: { type: String, default: 'NEUTRAL'}
     },
     food: {
         value: { type: Number, default: 50 },
-        status: { type: String, default: 'Hungry'}
+        status: { type: String, default: 'HUNGRY'}
     },
     mood: {
         value: { type: Number, default: 50 },
-        status: { type: String, default: 'Bored' }
+        status: { type: String, default: 'BORED' }
     },
     cleanliness: {
         value: { type: Number, default: 80 },
-        status: { type: String, default: 'Clean' }
+        status: { type: String, default: 'CLEAN' }
     },
     hasPooped: { type: Boolean, default: false },
     user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
