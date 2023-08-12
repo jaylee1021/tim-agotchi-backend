@@ -28,9 +28,9 @@ setInterval(async () => {
                 tim.cleanliness.value -= 0.00077;
             }
             if (tim.cleanliness.value <= 30) {
-                tim.cleanliness.status = 'Dirty';
+                tim.cleanliness.status = 'DIRTY';
             }
-            if (tim.cleanliness.status === 'Dirty') {
+            if (tim.cleanliness.status === 'DIRTY') {
                 tim.cleanliness.value -= (0.00077 * 2);
                 tim.mood.value -= (0.00077 * 2);
             }
@@ -78,6 +78,7 @@ setInterval(async () => {
             if (tim.food.value === 0) {
                 tim.alive = false;
                 tim.image = 'https://i.imgur.com/2En7QUb.png';
+                tim.save();
             }
         }
     } catch (error) {
@@ -115,11 +116,11 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food.status === "Full" && tim.food.value < 70) {
-                tim.food.status = "Hungry";
+            if (tim.food.status === "FULL" && tim.food.value < 70) {
+                tim.food.status = "HUNGRY";
             }
-            if (tim.mood.status === "Tired" && tim.mood.value < 70) {
-                tim.mood.status = "Bored"
+            if (tim.mood.status === "TIRED" && tim.mood.value < 70) {
+                tim.mood.status = "BORED"
             }
             tim.save();
         }
@@ -134,10 +135,10 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food.status === "Full") {
+            if (tim.food.status === "FULL") {
                 tim.hasPooped = true;
                 tim.cleanliness.value -= 30;
-                tim.cleanliness.status = "Dirty";
+                tim.cleanliness.status = "DIRTY";
                 evenOut(tim);
             }
             tim.save();
@@ -169,20 +170,20 @@ cron.schedule('0 1 * * *', () => {
 
 //checking friendship status
 function checkFriendship(tim) {
-    if (tim.type === 'Cat' && tim.friendship.value >= 80) {
-        tim.friendship.status = 'Best Friends';
+    if (tim.type === 'CAT' && tim.friendship.value >= 80) {
+        tim.friendship.status = 'BEST FRIENDS';
         tim.image = 'https://i.imgur.com/PM51tMH.png';
         tim.save();
-    } else if (tim.type === 'Cat' && tim.friendship.value <= 20) {
-        tim.friendship.staus = 'Enemies';
+    } else if (tim.type === 'CAT' && tim.friendship.value <= 20) {
+        tim.friendship.staus = 'ENEMIES';
         tim.image = 'https://i.imgur.com/kVqOjbT.png';
         tim.save();
-    } else if (tim.type === 'Dog' && tim.friendship.value >= 80) {
-        tim.friendship.status = 'Best Friends';
+    } else if (tim.type === 'DOG' && tim.friendship.value >= 80) {
+        tim.friendship.status = 'BEST FRIENDS';
         tim.image = 'https://i.imgur.com/FZucWaU.png';
         tim.save();
-    } else if (tim.type === 'Dog' && tim.friendship.value <= 20) {
-        tim.friendship.status = 'Enemies';
+    } else if (tim.type === 'DOG' && tim.friendship.value <= 20) {
+        tim.friendship.status = 'ENEMIES';
         tim.image = 'https://i.imgur.com/UkKFw6e.png';
         tim.save();
     }
@@ -379,12 +380,12 @@ router.put('/feed/:userId/:timId', async (req, res) => {
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
-            if (timagotchi && timagotchi.food.status === 'Hungry') {
+            if (timagotchi && timagotchi.food.status === 'HUNGRY') {
                 if (timagotchi.food.value < 100) {
                     timagotchi.food.value += 30;
                     timagotchi.friendship.value += 1;
                     evenOut(timagotchi);
-                    timagotchi.food.status = 'Full'
+                    timagotchi.food.status = 'FULL'
                     console.log('timagotchi', timagotchi.food.status);
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
@@ -406,12 +407,12 @@ router.put('/play/:userId/:timId', async (req, res) => {
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
-            if (timagotchi && timagotchi.mood.status === 'Bored') {
+            if (timagotchi && timagotchi.mood.status === 'BORED') {
                 if (timagotchi.mood.value < 100) {
                     timagotchi.mood.value += 30;
                     timagotchi.friendship.value += 1;
                     evenOut(timagotchi);
-                    timagotchi.mood.status = 'Tired'
+                    timagotchi.mood.status = 'TIRED'
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
@@ -436,7 +437,7 @@ router.put('/clean/:userId/:timId', async (req, res) => {
             timagotchi.friendship.value -= 1;
             evenOut(timagotchi);
             if (timagotchi.cleanliness.value > 80) {
-                timagotchi.cleanliness.status = 'Clean'
+                timagotchi.cleanliness.status = 'CLEAN'
             }
             timagotchi.save();
             return res.json({ timagotchi: timagotchi });
