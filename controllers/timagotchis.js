@@ -269,8 +269,8 @@ router.get('/my-timagotchis/:userId', async (req, res) => {
 });
 
 //get a tim by userId and timId
-router.get('/:userId/:timId', (req, res) => {
-    Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
+router.get('/:timId', (req, res) => {
+    Timagotchi.findOne({ _id: req.params.timId })
         .then(timagotchi => {
             if (timagotchi) {
                 return res.json({ timagotchi: timagotchi });
