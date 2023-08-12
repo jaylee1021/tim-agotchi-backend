@@ -50,17 +50,10 @@ setInterval(async () => {
             if (tim.food.value > 50 && tim.friendship.value <= 100 || tim.mood.value > 50 && tim.friendship.value <= 100 || tim.cleanliness.value > 50 && tim.friendship.value <= 100) {
                 tim.friendship.value += 0.000165; //If food or mood is above 50, friendship increases. Reaches full in 1 week
                 await tim.save();
-                if (tim.friendship.value > 100) {
-                    tim.friendship.value = 100;
-                    await tim.save();
-                }
             } else if (tim.food.value < 50 || tim.mood.value < 50 || tim.cleanliness.value < 50) {
                 tim.friendship.value -= 0.00013;
+                evenOut(tim);
                 await tim.save();
-                if (tim.friendship.value < 0) {
-                    tim.friendship.value = 0;
-                    await tim.save();
-                }
             }
             checkFriendship(tim);
         }
@@ -209,6 +202,12 @@ function evenOut(tim) {
     if (tim.cleanliness.value > 100) {
         tim.cleanliness.value = 100;
     }
+    if (tim.friendship.value > 100) {
+        tim.friendship.value = 100;  
+    }
+    if (tim.friendship.value < 0) {
+        tim.friendship.value = 0;
+    }
 
     return tim;
 }
@@ -291,7 +290,7 @@ router.get('/:timId', (req, res) => {
 router.post('/new', (req, res) => {
     let image;
     console.log('data from request', req.body);
-    if (req.body.type === 'Dog') {
+    if (req.body.type === 'DOG') {
         image = 'https://i.imgur.com/V3oECuL.png';
     } else {
         image = 'https://i.imgur.com/P7uFNKA.png';
