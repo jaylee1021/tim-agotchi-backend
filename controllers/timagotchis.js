@@ -13,7 +13,7 @@ const { Timagotchi, User } = require('../models');
 //----------------------FUNCTIONS----------------------//
 
 //decreasing food and mood value every second
-const setStatusBars = async () => {
+setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -39,10 +39,10 @@ const setStatusBars = async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-};
+}, 1000);
 
-//friendship status changing based on food and mood status every second
-const setFriendship = async () => {
+//friendship status changing based on food and mood status 
+setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -67,10 +67,10 @@ const setFriendship = async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-};
+}, 1000);
 
-//checking if alive
-const checkAlive = async () => {
+//checking if alive 
+setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -83,11 +83,11 @@ const checkAlive = async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
- 
-};
+
+}, 1000 * 60 * 60 * 2);
 
 //sending email notif if Tima is deathly hungry
-const checkEmail = async () => {
+setInterval(async () => {
     try {
         const users = await User.find({});
         for (let i = 0; i < users.length; i++) {
@@ -100,23 +100,25 @@ const checkEmail = async () => {
                     const subject = 'Your Timagotchi is hungry!';
                     const message = `${tim.name} is hungry! Please feed them!`;
                     sendEmail(toEmail, subject, message)
-            }}}
+                }
+            }
+        }
     } catch (error) {
         console.error('Error updating value:', error);
     }
 
-};
+}, 1000 * 60 * 60);
 
 //resesting food and mood status every 6 hours
-const setStatusText = async () => {
+setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food.status === "Full") {
+            if (tim.food.status === "Full" && tim.food.value < 70) {
                 tim.food.status = "Hungry";
             }
-            if (tim.mood.status === "Tired") {
+            if (tim.mood.status === "Tired" && tim.mood.value < 70) {
                 tim.mood.status = "Bored"
             }
             tim.save();
@@ -124,10 +126,10 @@ const setStatusText = async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-};
+}, 1000 * 60 * 60 * 6);
 
 //setting hasPooped to true based on Food status
-const setPoop = async () => {
+setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -143,7 +145,7 @@ const setPoop = async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-};
+}, 1000 * 60 * 60 * 3);
 
 //adding 1 to the age every 24 hours
 const addToAge = async () => {
@@ -161,28 +163,9 @@ const addToAge = async () => {
     }
 };
 
-cron.schedule('*/1 * * * * *', () => { //every second
-    setStatusBars();
-    setFriendship();
-})
-
-cron.schedule('* */1 * * *', () => { //every hour
-    checkAlive();
-    checkEmail();
-});
-
-cron.schedule('* */3 * * *', () => { //every 3 hours
-    setPoop();
-});
-
-cron.schedule('* */3 * * *', () => { //every 6 hours
-    setStatusText();
-});
-
-cron.schedule('0 1 * * *', () => { //every day at 1 AM
+cron.schedule('0 1 * * *', () => {
     addToAge();
 });
-
 
 //checking friendship status
 function checkFriendship(tim) {
@@ -348,7 +331,7 @@ router.delete('/:id', (req, res) => {
 
 router.delete('/all', (req, res) => {
     // const { query } = req.body
-    Timagotchi.deleteMany({type: 'Dog'})
+    Timagotchi.deleteMany({ type: 'Dog' })
         .then(timagotchis => {
             return res.json({ message: 'All Timagotchis Deleted' });
         })
@@ -481,4 +464,3 @@ router.put('/pooperscooper/:userId/:timId', async (req, res) => {
 });
 
 module.exports = router;
-
