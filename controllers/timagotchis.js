@@ -5,12 +5,10 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const rateLimit = require('express-rate-limit');
 const cron = require('node-cron');
 const { JWT_SECRET, EMAIL_APP_PASSWORD } = process.env;
-const { Timagotchi } = require('../models');
+const { Timagotchi, User } = require('../models');
 
-const userAccess = {};
 
 //----------------------FUNCTIONS----------------------//
 
@@ -22,12 +20,21 @@ setInterval(async () => {
             let tim = tims[i];
             if (tim.food.value > 0) {
                 tim.food.value -= 0.00077;
-                await tim.save();
             }
             if (tim.mood.value > 0) {
                 tim.mood.value -= 0.00077;
-                await tim.save();
             }
+            if (tim.cleanliness.value > 0) {
+                tim.cleanliness.value -= 0.00077;
+            }
+            if (tim.cleanliness.value <= 30) {
+                tim.cleanliness.status = 'Dirty';
+            }
+            if (tim.cleanliness.status === 'Dirty') {
+                tim.cleanliness.value -= (0.00077 * 2);
+                tim.mood.value -= (0.00077 * 2);
+            }
+            await tim.save();
         }
     } catch (error) {
         console.error('Error updating value:', error);
@@ -40,14 +47,14 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food.value > 50 && tim.friendship.value <= 100 || tim.mood.value > 50 && tim.friendship.value <= 100) {
+            if (tim.food.value > 50 && tim.friendship.value <= 100 || tim.mood.value > 50 && tim.friendship.value <= 100 || tim.cleanliness.value > 50 && tim.friendship.value <= 100) {
                 tim.friendship.value += 0.000165; //If food or mood is above 50, friendship increases. Reaches full in 1 week
                 await tim.save();
                 if (tim.friendship.value > 100) {
                     tim.friendship.value = 100;
                     await tim.save();
                 }
-            } else if (tim.food.value < 50 || tim.mood.value < 50) {
+            } else if (tim.food.value < 50 || tim.mood.value < 50 || tim.cleanliness.value < 50) {
                 tim.friendship.value -= 0.00013;
                 await tim.save();
                 if (tim.friendship.value < 0) {
@@ -68,7 +75,7 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food.value === 0 && tim.mood.value === 0) {
+            if (tim.food.value === 0) {
                 tim.alive = false;
                 tim.image = 'https://i.imgur.com/2En7QUb.png';
             }
@@ -76,8 +83,31 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
+ 
+}, 1000 * 60 * 60 * 2);
+
+//sending email notif if Tima is deathly hungry
+setInterval(async () => {
+    try {
+        const users = await User.find({});
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            const tims = await Timagotchi.find({ user: user._id });
+            for (let j = 0; j < tims.length; j++) {
+                const tim = tims[j];
+                if (tim.food.value < 15 && tim.food.value > 0 && tim.alive) {
+                    const toEmail = user.email;
+                    const subject = 'Your Timagotchi is hungry!';
+                    const message = `${tim.name} is hungry! Please feed them!`;
+                    sendEmail(toEmail, subject, message)
+            }}}
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+
 }, 1000 * 60 * 60);
 
+//resesting food and mood status every 6 hours
 setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
@@ -94,7 +124,26 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000 * 60);
+}, 1000 * 60 * 60 * 6);
+
+//setting hasPooped to true based on Food status
+setInterval(async () => {
+    try {
+        const tims = await Timagotchi.find({});
+        for (i in tims) {
+            let tim = tims[i];
+            if (tim.food.status === "Full") {
+                tim.hasPooped = true;
+                tim.cleanliness.value -= 30;
+                tim.cleanliness.status = "Dirty";
+                evenOut(tim);
+            }
+            tim.save();
+        }
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+}, 1000 * 60 * 60 * 3);
 
 //adding 1 to the age every 24 hours
 const addToAge = async () => {
@@ -121,17 +170,20 @@ function checkFriendship(tim) {
     if (tim.type === 'Cat' && tim.friendship.value >= 80) {
         tim.friendship.status = 'Best Friends';
         tim.image = 'https://i.imgur.com/PM51tMH.png';
+        tim.save();
     } else if (tim.type === 'Cat' && tim.friendship.value <= 20) {
         tim.friendship.staus = 'Enemies';
         tim.image = 'https://i.imgur.com/kVqOjbT.png';
+        tim.save();
     } else if (tim.type === 'Dog' && tim.friendship.value >= 80) {
         tim.friendship.status = 'Best Friends';
         tim.image = 'https://i.imgur.com/FZucWaU.png';
+        tim.save();
     } else if (tim.type === 'Dog' && tim.friendship.value <= 20) {
         tim.friendship.status = 'Enemies';
         tim.image = 'https://i.imgur.com/UkKFw6e.png';
+        tim.save();
     }
-    tim.save();
     return tim;
 }
 
@@ -148,23 +200,15 @@ function evenOut(tim) {
     if (tim.mood.value > 100) {
         tim.mood.value = 100;
     }
+    if (tim.cleanliness.value < 0) {
+        tim.cleanliness.value = 0;
+    }
+    if (tim.cleanliness.value > 100) {
+        tim.cleanliness.value = 100;
+    }
+
     return tim;
 }
-
-//limiting route access
-// const limiter = rateLimit({
-//     windowMs: 6 * 60 * 60 * 1000, // 6 hours in milliseconds
-//     max: 1, // Allow only 1 request every 6 hours
-//     message: 'Your Timagotchi is tired. Give it a break!',
-//     keyGenerator: (req) => {
-//         // Generate a unique key for each user based on IP address, userId, and timId
-//         return `${req.params.userId}:${req.params.timId}`;
-//     },
-//     handler: (req, res) => {
-//         // Handle rate limit exceeded
-//         res.status(429).json({ message: 'Your Timagotchi is tired. Give it a break!' });
-//     },
-// });
 
 const nodemailer = require("nodemailer");
 
@@ -176,8 +220,8 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// async..await is not allowed in global scope, must use a wrapper
-function main(toEmail, subject, message) {
+
+function sendEmail(toEmail, subject, message) {
     // send mail with defined transport object
     const mailOptions = {
         from: 'timagotchi.app@gmail.com', // sender address
@@ -283,6 +327,18 @@ router.delete('/:id', (req, res) => {
         });
 });
 
+router.delete('/all', (req, res) => {
+    // const { query } = req.body
+    Timagotchi.deleteMany({type: 'Dog'})
+        .then(timagotchis => {
+            return res.json({ message: 'All Timagotchis Deleted' });
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
+});
+
 
 
 //update a timagotchi's name
@@ -318,17 +374,13 @@ router.put('/:id', async (req, res) => {
 });
 
 router.put('/feed/:userId/:timId', async (req, res) => {
-    // const userKey = `${req.params.userId}:${req.params.timId}`;
-
-    // if (userAccess[userKey] && Date.now() - userAccess[userKey] < 6 * 60 * 60 * 1000) {
-    //     return res.status(429).json({ message: 'You cannot feed the same Timagotchi within 6 hours.' });
-    // }
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
             if (timagotchi && timagotchi.food.status === 'Hungry') {
                 if (timagotchi.food.value < 100) {
                     timagotchi.food.value += 30;
+                    timagotchi.friendship.value += 1;
                     evenOut(timagotchi);
                     timagotchi.food.status = 'Full'
                     console.log('timagotchi', timagotchi.food.status);
@@ -349,17 +401,13 @@ router.put('/feed/:userId/:timId', async (req, res) => {
 });
 
 router.put('/play/:userId/:timId', async (req, res) => {
-    // const userKey = `${req.params.userId}:${req.params.timId}`;
-
-    // if (userAccess[userKey] && Date.now() - userAccess[userKey] < 6 * 60 * 60 * 1000) {
-    //     return res.status(429).json({ message: 'You cannot feed the same Timagotchi within 6 hours.' });
-    // }
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
             if (timagotchi && timagotchi.mood.status === 'Bored') {
                 if (timagotchi.mood.value < 100) {
                     timagotchi.mood.value += 30;
+                    timagotchi.friendship.value += 1;
                     evenOut(timagotchi);
                     timagotchi.mood.status = 'Tired'
                     timagotchi.save();
@@ -370,6 +418,26 @@ router.put('/play/:userId/:timId', async (req, res) => {
             } else {
                 return res.json({ message: `${timagotchi.name} is tuckered out!` });
             }
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
+
+});
+
+router.put('/clean/:userId/:timId', async (req, res) => {
+
+    Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
+        .then(timagotchi => {
+            timagotchi.cleanliness.value += 30;
+            timagotchi.friendship.value -= 1;
+            evenOut(timagotchi);
+            if (timagotchi.cleanliness.value > 80) {
+                timagotchi.cleanliness.status = 'Clean'
+            }
+            timagotchi.save();
+            return res.json({ timagotchi: timagotchi });
         })
         .catch(error => {
             console.log('error', error);
