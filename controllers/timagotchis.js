@@ -42,7 +42,7 @@ const setStatusBars = async () => {
 };
 
 //friendship status changing based on food and mood status every second
-setInterval(async () => {
+const setFriendship = async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -67,10 +67,10 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000);
+};
 
-//checking if alive every hour
-setInterval(async () => {
+//checking if alive
+const checkAlive = async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -84,10 +84,10 @@ setInterval(async () => {
         console.error('Error updating value:', error);
     }
  
-}, 1000 * 60 * 60);
+};
 
-//sending email notif if Tima is deathly hungry every hour
-setInterval(async () => {
+//sending email notif if Tima is deathly hungry
+const checkEmail = async () => {
     try {
         const users = await User.find({});
         for (let i = 0; i < users.length; i++) {
@@ -105,10 +105,10 @@ setInterval(async () => {
         console.error('Error updating value:', error);
     }
 
-}, 1000 * 60 * 60);
+};
 
 //resesting food and mood status every 6 hours
-setInterval(async () => {
+const setStatusText = async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -124,10 +124,10 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000 * 60 * 60 * 6);
+};
 
-//setting hasPooped to true based on Food status every 3 hours
-setInterval(async () => {
+//setting hasPooped to true based on Food status
+const setPoop = async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -143,7 +143,7 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000 * 60 * 60 * 3);
+};
 
 //adding 1 to the age every 24 hours
 const addToAge = async () => {
@@ -161,13 +161,28 @@ const addToAge = async () => {
     }
 };
 
-cron.schedule('0 1 * * *', () => {
+cron.schedule('*/1 * * * * *', () => { //every second
+    setStatusBars();
+    setFriendship();
+})
+
+cron.schedule('* */1 * * *', () => { //every hour
+    checkAlive();
+    checkEmail();
+});
+
+cron.schedule('* */3 * * *', () => { //every 3 hours
+    setPoop();
+});
+
+cron.schedule('* */3 * * *', () => { //every 6 hours
+    setStatusText();
+});
+
+cron.schedule('0 1 * * *', () => { //every day at 1 AM
     addToAge();
 });
 
-cron.schedule('*/1 * * * * *', () => {
-    setStatusBars();
-})
 
 //checking friendship status
 function checkFriendship(tim) {
