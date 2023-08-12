@@ -13,7 +13,7 @@ const { Timagotchi, User } = require('../models');
 //----------------------FUNCTIONS----------------------//
 
 //decreasing food and mood value every second
-setInterval(async () => {
+const setStatusBars = async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -39,9 +39,9 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}, 1000);
+};
 
-//friendship status changing based on food and mood status 
+//friendship status changing based on food and mood status every second
 setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
@@ -69,7 +69,7 @@ setInterval(async () => {
     }
 }, 1000);
 
-//checking if alive 
+//checking if alive every hour
 setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
@@ -84,9 +84,9 @@ setInterval(async () => {
         console.error('Error updating value:', error);
     }
  
-}, 1000 * 60 * 60 * 2);
+}, 1000 * 60 * 60);
 
-//sending email notif if Tima is deathly hungry
+//sending email notif if Tima is deathly hungry every hour
 setInterval(async () => {
     try {
         const users = await User.find({});
@@ -126,7 +126,7 @@ setInterval(async () => {
     }
 }, 1000 * 60 * 60 * 6);
 
-//setting hasPooped to true based on Food status
+//setting hasPooped to true based on Food status every 3 hours
 setInterval(async () => {
     try {
         const tims = await Timagotchi.find({});
@@ -164,6 +164,10 @@ const addToAge = async () => {
 cron.schedule('0 1 * * *', () => {
     addToAge();
 });
+
+cron.schedule('*/1 * * * * *', () => {
+    setStatusBars();
+})
 
 //checking friendship status
 function checkFriendship(tim) {
