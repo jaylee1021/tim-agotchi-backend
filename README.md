@@ -1,88 +1,54 @@
-# mongoose-app
-Create Express API using Mongoose and more ...
+# Tim-agotchi Backend
+The backbone of a MERN app inspired by the popular keychain toy. Take care of your virtual pet by feeding it, playing with it and cleaning up after it's little messes. 
 
-## Lab
-#### `1` Create a conditional that returns all users based off of `state`
+## Models
 
-#### `2` Create a `Vehicle` model with the following:
-   - [ ] make
-   - [ ] model
-   - [ ] type
-   - [ ] vin
-   - [ ] color
-   - [ ] fuel
+There are only two models that cover the entirety of Timagotchi's functionality, however, they both are critical. 
 
-#### `3` Make a `createRandomVehicles` function and test function
-   - [ ] commit message
-```
-commit -m feat: add Vehicle model and createRandomVehicles function
+Up first is the user route. With this model, two componenets are absolutely necessary to the app's functionality. 
+
+```javascript
+   email: { type: String, required: true, unique: true }
+   password: { type: String, required: true },
 ```
 
-#### `4` Create a `/vehicles` route
+The password is hashed and salted using bcryptjs, while the email is used to verify the user's identity and allow them to log in. We have also set up funtionality to send a user an email if their virtual companions are in need of some TLC. 
 
-#### `5` Create a `/vehicles/:field/:value` route
-   - [ ] Make conditionals with each field
-   - [ ] Add commit message
-```
-commit -m feat: add /vehicles and /vehicles/:field/:value route
-```
+Foremostly, we have the eponymous Timagotchi model. 
 
-#### `6` Create a `Company` model with the following:
-   - [ ] name
-   - [ ] address ( location )
-   - [ ] city
-   - [ ] state
-   - [ ] zipCode
-         
-#### `7` Make a `createRandomCompany` function
-   - [ ] commit message
-```
-commit -m feat: add Company model and createRandomCompany function
-```
-#### `8` Create a `/companies` route
+```javascript
 
-#### `9` Create a `/companies/:field/:value` route
-   - [ ] Make conditionals with each field
-   - [ ] Add commit message
-```
-commit -m feat: add /companies and /companies/:field/:value route
-```
+const timagotchiSchema = new mongoose.Schema({
+    name: String,
+    image: String,
+    type: String,
+    gender: String,
+    age: { type: Number, default: 0 },
+    friendship: {
+        value: { type: Number, default: 30 },
+        status: { type: String, default: 'NEUTRAL'}
+    },
+    food: {
+        value: { type: Number, default: 50 },
+        status: { type: String, default: 'HUNGRY'}
+    },
+    mood: {
+        value: { type: Number, default: 50 },
+        status: { type: String, default: 'BORED' }
+    },
+    cleanliness: {
+        value: { type: Number, default: 80 },
+        status: { type: String, default: 'CLEAN' }
+    },
+    hasPooped: { type: Boolean, default: false },
+    user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    alive: { type: Boolean, default: true },
 
-#### `10` Create a `Airline` model with the following:
-   - [ ] aircraftType
-   - [ ] airline
-   - [ ] airplane
-   - [ ] airport
-   - [ ] flightNumber
-   - [ ] recordLocator
-   - [ ] seat
+}, { timestamps: true });
 
-#### `11` Make a `createRandomAirlines` function and test
-
-#### `12` Create a `/airlines` route
-
-#### `13` Create a `/airlines/:field/:value` route
-  - [ ] Make conditionals with each field
-  - [ ] Add commit message
 
 ```
-commit -m feat: add Airlines model and createRandomAirlines function
-```
 
-Create a `Commerce` model with the following:
-   - [ ] department
-   - [ ] price
-   - [ ] product
-   - [ ] productAdjective
-   - [ ] productDescription
-   - [ ] productMaterial
-   - [ ] productName
+Each Timagotchi is attached to a user via a MANY-TO-ONE relationship. This makes it easy to find all Timagotchis by a certain user, and
 
-Make a `createRandomCommerce` function
-commit message
-Create a `/commerce` route
-Create a `/commerce/:field/:value` route
-conditionals with each field
-```
-commit -m feat: add Commerce model and routes
-```
+And here, we get a glimpse of the app's mechanics.

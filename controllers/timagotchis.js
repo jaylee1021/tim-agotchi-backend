@@ -34,6 +34,7 @@ setInterval(async () => {
                 tim.cleanliness.value -= (0.00077 * 2);
                 tim.mood.value -= (0.00077 * 2);
             }
+            evenOut(tim);
             await tim.save();
         }
     } catch (error) {
@@ -56,7 +57,7 @@ setInterval(async () => {
                 evenOut(tim);
                 await tim.save();
             }
-            checkFriendship(tim);
+            await checkFriendship(tim);
         }
     } catch (error) {
         console.error('Error updating value:', error);
@@ -72,7 +73,7 @@ setInterval(async () => {
             if (tim.food.value === 0) {
                 tim.alive = false;
                 tim.image = 'https://i.imgur.com/2En7QUb.png';
-                tim.save();
+                await tim.save();
             }
         }
     } catch (error) {
@@ -134,8 +135,9 @@ setInterval(async () => {
                 tim.cleanliness.value -= 30;
                 tim.cleanliness.status = "DIRTY";
                 evenOut(tim);
+                await tim.save();
             }
-            tim.save();
+            
         }
     } catch (error) {
         console.error('Error updating value:', error);
@@ -330,19 +332,6 @@ router.delete('/:id', (req, res) => {
         });
 });
 
-router.delete('/all', (req, res) => {
-    // const { query } = req.body
-    Timagotchi.deleteMany({ type: 'Dog' })
-        .then(timagotchis => {
-            return res.json({ message: 'All Timagotchis Deleted' });
-        })
-        .catch(error => {
-            console.log('error', error);
-            return res.json({ message: 'There was an issue, please try again' });
-        });
-});
-
-
 
 //update a timagotchi's name
 router.put('/:id', async (req, res) => {
@@ -380,7 +369,7 @@ router.put('/feed/:userId/:timId', async (req, res) => {
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
-            if (timagotchi && timagotchi.food.status === 'HUNGRY') {
+            if (timagotchi && timagotchi.food.status === 'HUNGRY' && timagotchi.alive === true) {
                 if (timagotchi.food.value < 100) {
                     timagotchi.food.value += 30;
                     timagotchi.friendship.value += 1;
@@ -390,10 +379,10 @@ router.put('/feed/:userId/:timId', async (req, res) => {
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
-                    return res.json({ message: `${timagotchi.name} is full` });
+                    return res.json({ message: `${timagotchi.name} can't be fed right now` });
                 }
             } else {
-                return res.json({ message: `${timagotchi.name} is full` });
+                return res.json({ message: `${timagotchi.name} can't be fed right now` });
             }
         })
         .catch(error => {
@@ -407,7 +396,7 @@ router.put('/play/:userId/:timId', async (req, res) => {
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
-            if (timagotchi && timagotchi.mood.status === 'BORED') {
+            if (timagotchi && timagotchi.mood.status === 'BORED' && timagotchi.alive === true) {
                 if (timagotchi.mood.value < 100) {
                     timagotchi.mood.value += 30;
                     timagotchi.friendship.value += 1;
@@ -416,10 +405,10 @@ router.put('/play/:userId/:timId', async (req, res) => {
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
-                    return res.json({ message: `${timagotchi.name} is tuckered out!` });
+                    return res.json({ message: `${timagotchi.name} can't play right now` });
                 }
             } else {
-                return res.json({ message: `${timagotchi.name} is tuckered out!` });
+                return res.json({ message: `${timagotchi.name} can't play right now` });
             }
         })
         .catch(error => {
@@ -433,14 +422,16 @@ router.put('/clean/:userId/:timId', async (req, res) => {
 
     Timagotchi.findOne({ user: req.params.userId, _id: req.params.timId })
         .then(timagotchi => {
-            timagotchi.cleanliness.value += 30;
-            timagotchi.friendship.value -= 1;
-            evenOut(timagotchi);
-            if (timagotchi.cleanliness.value > 80) {
-                timagotchi.cleanliness.status = 'CLEAN'
+            if (timagotchi.alive === true) {
+                timagotchi.cleanliness.value += 30;
+                timagotchi.friendship.value -= 1;
+                evenOut(timagotchi);
+                if (timagotchi.cleanliness.value > 80) {
+                    timagotchi.cleanliness.status = 'CLEAN'
+                }
+                timagotchi.save();
+                return res.json({ timagotchi: timagotchi });
             }
-            timagotchi.save();
-            return res.json({ timagotchi: timagotchi });
         })
         .catch(error => {
             console.log('error', error);
