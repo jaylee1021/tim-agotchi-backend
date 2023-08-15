@@ -98,7 +98,7 @@ setInterval(async () => {
                     const toEmail = user.email;
                     const subject = 'Your Timagotchi is hungry!';
                     const message = `${tim.name} is hungry! Please feed them!`;
-                    sendEmail(toEmail, subject, message)
+                    sendEmail(toEmail, subject, message);
                 }
             }
         }
@@ -118,7 +118,7 @@ setInterval(async () => {
                 tim.food.status = "HUNGRY";
             }
             if (tim.mood.status === "TIRED" && tim.mood.value < 70) {
-                tim.mood.status = "BORED"
+                tim.mood.status = "BORED";
             }
             await tim.save();
         }
@@ -140,7 +140,7 @@ setInterval(async () => {
                 evenOut(tim);
                 await tim.save();
             }
-            
+
         }
     } catch (error) {
         console.error('Error updating value:', error);
@@ -212,7 +212,7 @@ function evenOut(tim) {
         tim.friendship.value = 0;
     }
     if (tim.friendship.value > 100) {
-        tim.friendship.value = 100;  
+        tim.friendship.value = 100;
     }
 
 
@@ -252,7 +252,6 @@ function sendEmail(toEmail, subject, message) {
 router.get('/', (req, res) => {
     Timagotchi.find({})
         .then(timagotchis => {
-            console.log('timagotchis', timagotchis);
             return res.json(timagotchis);
         })
         .catch(err => {
@@ -310,7 +309,6 @@ router.post('/new', (req, res) => {
         user: req.body.user,
     })
         .then((newTimagotchi) => {
-            console.log('new Timagotchi created =>', newTimagotchi);
             return res.json({ timagotchi: newTimagotchi });
         })
         .catch((error) => {
@@ -323,18 +321,26 @@ router.post('/new', (req, res) => {
 //delete a timagotchi
 router.delete('/:id', (req, res) => {
     Timagotchi.findByIdAndDelete(req.params.id)
-        .then(timagotchi => {
-            if (timagotchi) {
-                return res.json({ message: 'Timagotchi Deleted' });
-            } else {
-                return res.json({ message: 'No Timagotchi Found' });
-            }
+        .then(response => {
+            return res.json({ message: 'Timagotchi Deleted' });
         })
         .catch(error => {
             console.log('error', error);
             return res.json({ message: 'There was an issue, please try again' });
         });
 });
+
+router.delete('/deleteMany/:userId', (req, res) => {
+    Timagotchi.deleteMany({ user: req.params.userId })
+        .then(response => {
+            return res.json({ message: 'Timagotchis Deleted' });
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue, please try again' });
+        });
+});
+
 
 
 //update a timagotchi's name
@@ -378,7 +384,7 @@ router.put('/feed/:userId/:timId', async (req, res) => {
                     timagotchi.food.value += 30;
                     timagotchi.friendship.value += 1;
                     evenOut(timagotchi);
-                    timagotchi.food.status = 'FULL'
+                    timagotchi.food.status = 'FULL';
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
@@ -404,7 +410,7 @@ router.put('/play/:userId/:timId', async (req, res) => {
                     timagotchi.mood.value += 30;
                     timagotchi.friendship.value += 1;
                     evenOut(timagotchi);
-                    timagotchi.mood.status = 'TIRED'
+                    timagotchi.mood.status = 'TIRED';
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
@@ -430,7 +436,7 @@ router.put('/clean/:userId/:timId', async (req, res) => {
                 timagotchi.friendship.value -= 1;
                 evenOut(timagotchi);
                 if (timagotchi.cleanliness.value > 80) {
-                    timagotchi.cleanliness.status = 'CLEAN'
+                    timagotchi.cleanliness.status = 'CLEAN';
                 }
                 timagotchi.save();
                 return res.json({ timagotchi: timagotchi });
