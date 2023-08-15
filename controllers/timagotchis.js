@@ -73,6 +73,9 @@ setInterval(async () => {
             if (tim.food.value === 0) {
                 tim.alive = false;
                 tim.image = 'https://i.imgur.com/2En7QUb.png';
+                tim.food.status === 'R';
+                tim.mood.status === 'I';
+                tim.cleanliness.status === 'P';
                 await tim.save();
             }
         }
@@ -117,7 +120,7 @@ setInterval(async () => {
             if (tim.mood.status === "TIRED" && tim.mood.value < 70) {
                 tim.mood.status = "BORED"
             }
-            tim.save();
+            await tim.save();
         }
     } catch (error) {
         console.error('Error updating value:', error);
@@ -160,7 +163,7 @@ const addToAge = async () => {
     }
 };
 
-cron.schedule('0 1 * * *', () => {
+cron.schedule('0 1 * * *', () => { //schedule at 1 am
     addToAge();
 });
 
@@ -190,11 +193,11 @@ function evenOut(tim) {
     if (tim.food.value < 0) {
         tim.food.value = 0;
     }
-    if (tim.mood.value < 0) {
-        tim.mood.value = 0;
-    }
     if (tim.food.value > 100) {
         tim.food.value = 100;
+    }
+    if (tim.mood.value < 0) {
+        tim.mood.value = 0;
     }
     if (tim.mood.value > 100) {
         tim.mood.value = 100;
@@ -205,12 +208,13 @@ function evenOut(tim) {
     if (tim.cleanliness.value > 100) {
         tim.cleanliness.value = 100;
     }
-    if (tim.friendship.value > 100) {
-        tim.friendship.value = 100;  
-    }
     if (tim.friendship.value < 0) {
         tim.friendship.value = 0;
     }
+    if (tim.friendship.value > 100) {
+        tim.friendship.value = 100;  
+    }
+
 
     return tim;
 }
@@ -375,7 +379,6 @@ router.put('/feed/:userId/:timId', async (req, res) => {
                     timagotchi.friendship.value += 1;
                     evenOut(timagotchi);
                     timagotchi.food.status = 'FULL'
-                    console.log('timagotchi', timagotchi.food.status);
                     timagotchi.save();
                     return res.json({ timagotchi: timagotchi });
                 } else {
