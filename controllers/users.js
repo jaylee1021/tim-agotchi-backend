@@ -159,10 +159,10 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE /users/:id (delete a user)
-router.delete('/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
-    // console.log('entering delete route', req.params.id);
+router.delete('/:id', (req, res) => {
     User.findByIdAndDelete(req.params.id)
         .then(user => {
+            console.log('deleted', user);
             return res.json({ message: `${user.email} was deleted` });
         })
         .catch(error => {
@@ -170,5 +170,6 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), (req, re
             return res.json({ message: 'There was an issue, please try again' });
         });
 });
+// passport.authenticate('jwt', { session: false }) <-- may need this later
 
 module.exports = router;

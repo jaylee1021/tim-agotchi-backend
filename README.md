@@ -1,5 +1,5 @@
 # Tim-agotchi Backend
-The backbone of a MERN app inspired by the popular keychain toy. Take care of your virtual pet by feeding it, playing with it and cleaning up after it's little messes. 
+The backbone of a MERN app inspired by the popular keychain toy. Take care of your virtual pet by feeding it, playing with it and cleaning up after its little messes. 
 
 ## Models
 
@@ -85,4 +85,7 @@ The first step is for users to sign-up. We salt and hash the users' passwords an
                     });
                 });
 ```
+
+
+And here, we get a glimpse of the app's mechanics.
 
