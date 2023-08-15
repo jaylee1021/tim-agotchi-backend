@@ -51,6 +51,41 @@ const timagotchiSchema = new mongoose.Schema({
 
 ```
 
-Each Timagotchi is attached to a user via a MANY-TO-ONE relationship. This makes it easy to find all Timagotchis by a certain user, and
+Each Timagotchi is attached to a user via a MANY-TO-ONE relationship. This makes it easy to find all Timagotchis by a certain user, and to tie a specific user to a Timagotchi. 
+
+We also get a glimpse of the app's mechanics, which manifest through six different objects within the model. These are values and statuses that are updated by the app itself via the ```setInterval()``` function, and by the user through various "PUT" routes. Any variable within the model that does not have a default value is updated by the users' input when they create their virtual pet. 
+
+## Routes
+
+The routes for the models are handled through controllers and sent to the app.js (server) file. The routes are handled by the express dependency and are routed through to the app.js (server) file through the use of the ```express.Router()``` method.
+### Users 
+
+The first step is for users to sign-up. We salt and hash the users' passwords and then save them to the database for security purposes. 
+
+```javascript 
+                bcrypt.genSalt(10, (err, salt) => {
+                    if (err) throw Error;
+
+                    bcrypt.hash(newUser.password, salt, (err, hash) => {
+                        if (err) console.log('==> Error inside of hash', err);
+                        // Change the password in newUser to the hash
+                        newUser.password = hash;
+                        newUser.save()
+                            .then(createdUser => {
+                                // remove password from being returned inside of response, still in DB
+                                if (createdUser.password) {
+                                    createdUser.password = '...'; // hide the password
+                                    res.json({ user: createdUser });
+                                }
+                            })
+                            .catch(err => {
+                                console.log('error with creating new user', err);
+                                res.json({ message: 'Error occured... Please try again.' });
+                            });
+                    });
+                });
+```
+
 
 And here, we get a glimpse of the app's mechanics.
+

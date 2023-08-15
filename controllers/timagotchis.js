@@ -12,10 +12,9 @@ const { Timagotchi, User } = require('../models');
 
 //----------------------FUNCTIONS----------------------//
 
-//decreasing food and mood value every second
-setInterval(async () => {
-    try {
-        const tims = await Timagotchi.find({});
+const degradeValues = async () => {
+
+   try { const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
             if (tim.food.value > 0) {
@@ -37,13 +36,13 @@ setInterval(async () => {
             evenOut(tim);
             await tim.save();
         }
-    } catch (error) {
-        console.error('Error updating value:', error);
-    }
-}, 1000);
+        
+   } catch (error) {
+       console.error('Error updating value:', error);
+   }
+}
 
-//friendship status changing based on food and mood status 
-setInterval(async () => {
+const alterFriendship = async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -58,14 +57,24 @@ setInterval(async () => {
                 await tim.save();
             }
             await checkFriendship(tim);
-        }
+        } 
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+}
+
+//decreasing food and mood value every second
+setInterval(async () => {
+    try {
+        degradeValues()
+        alterFriendship()
+
     } catch (error) {
         console.error('Error updating value:', error);
     }
 }, 1000);
 
-//checking if alive 
-setInterval(async () => {
+const checkAlive = async () => {
     try {
         const tims = await Timagotchi.find({});
         for (i in tims) {
@@ -82,11 +91,9 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
+}
 
-}, 1000 * 60 * 60 * 2);
-
-//sending email notif if Tima is deathly hungry
-setInterval(async () => {
+const checkForEmail = async () => {
     try {
         const users = await User.find({});
         for (let i = 0; i < users.length; i++) {
@@ -105,8 +112,19 @@ setInterval(async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
+}
 
-}, 1000 * 60 * 60);
+//setting functions to run every two hours
+setInterval(async () => {
+    try {
+        checkAlive();
+        checkForEmail();
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+
+}, 1000 * 60 * 60 * 2);
+
 
 //resesting food and mood status every 6 hours
 setInterval(async () => {
@@ -295,7 +313,6 @@ router.get('/:timId', (req, res) => {
 //create a new timagotchi
 router.post('/new', (req, res) => {
     let image;
-    console.log('data from request', req.body);
     if (req.body.type === 'DOG') {
         image = 'https://i.imgur.com/V3oECuL.png';
     } else {
