@@ -12,9 +12,14 @@ app.use(cors());
 app.use(passport.initialize());
 
 app.get('/', (req, res) => {
- 
-        res.json({ message: 'Welcome to Timagotchi' });
 
+    res.send({ message: 'Welcome to Timagotchi' });
+
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Internal Server Error' });
 });
 
 
