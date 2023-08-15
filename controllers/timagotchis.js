@@ -36,6 +36,7 @@ const degradeValues = async () => {
             evenOut(tim);
             await tim.save();
         }
+        
    } catch (error) {
        console.error('Error updating value:', error);
    }
