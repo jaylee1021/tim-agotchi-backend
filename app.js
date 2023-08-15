@@ -12,12 +12,9 @@ app.use(cors());
 app.use(passport.initialize());
 
 app.get('/', (req, res) => {
-    try {
-        return res.json({ message: 'Welcome to Timagotchi' });
-    }
-    catch {
-        return res.json({ message: 'Welcome to Timagotchi' })
-    }
+ 
+        res.json({ message: 'Welcome to Timagotchi' });
+
 });
 
 
