@@ -8,8 +8,10 @@ There are only two models that cover the entirety of Timagotchi's functionality,
 Up first is the user route. With this model, two componenets are absolutely necessary to the app's functionality. 
 
 ```javascript
+
    email: { type: String, required: true, unique: true }
    password: { type: String, required: true },
+
 ```
 
 The password is hashed and salted using bcryptjs, while the email is used to verify the user's identity and allow them to log in. We have also set up funtionality to send a user an email if their virtual companions are in need of some TLC. 
