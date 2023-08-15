@@ -73,9 +73,9 @@ setInterval(async () => {
             if (tim.food.value === 0) {
                 tim.alive = false;
                 tim.image = 'https://i.imgur.com/2En7QUb.png';
-                tim.food.status === 'R';
-                tim.mood.status === 'I';
-                tim.cleanliness.status === 'P';
+                tim.friendship.status === 'R';
+                tim.food.status === 'I';
+                tim.mood.status === 'P';
                 await tim.save();
             }
         }
