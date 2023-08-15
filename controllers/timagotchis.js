@@ -82,9 +82,9 @@ const checkAlive = async () => {
             if (tim.food.value === 0) {
                 tim.alive = false;
                 tim.image = 'https://i.imgur.com/2En7QUb.png';
-                tim.friendship.status === 'R';
-                tim.food.status === 'I';
-                tim.mood.status === 'P';
+                tim.friendship.status = 'R';
+                tim.food.status = 'I';
+                tim.mood.status = 'P';
                 await tim.save();
             }
         }
