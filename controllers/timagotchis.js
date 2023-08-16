@@ -12,6 +12,8 @@ const { Timagotchi, User } = require('../models');
 
 //----------------------FUNCTIONS----------------------//
 
+
+//degrades values. If you add 30
 const degradeValues = async () => {
 
    try { const tims = await Timagotchi.find({});
@@ -114,9 +116,29 @@ const checkForEmail = async () => {
     }
 }
 
+//play more?
+const playMore = async () => {
+    try {
+        const tims = await Timagotchi.find({});
+        for (i in tims) {
+            let tim = tims[i];
+            if (tim.food.status < 50) {
+                tim.food.status = "HUNGRY";
+            }
+            if (tim.mood.status < 50) {
+                tim.mood.status = "BORED"
+            }
+        }
+    }
+    catch (error) {
+        console.error('Error updating values less than 50', error)
+    }
+}
+
 //setting functions to run every two hours
 setInterval(async () => {
     try {
+        playMore();
         checkAlive();
         checkForEmail();
     } catch (error) {
@@ -247,7 +269,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-
+//set up email sending
 function sendEmail(toEmail, subject, message) {
     // send mail with defined transport object
     const mailOptions = {
