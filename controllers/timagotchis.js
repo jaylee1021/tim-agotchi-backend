@@ -132,10 +132,10 @@ setInterval(async () => {
         const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
-            if (tim.food.status === "FULL" && tim.food.value < 70) {
+            if (tim.food.status === "FULL" && tim.food.value < 70 || tim.food.value < 50) {
                 tim.food.status = "HUNGRY";
             }
-            if (tim.mood.status === "TIRED" && tim.mood.value < 70) {
+            if (tim.mood.status === "TIRED" && tim.mood.value < 70 || tim.mood.value < 50) {
                 tim.mood.status = "BORED";
             }
             await tim.save();
