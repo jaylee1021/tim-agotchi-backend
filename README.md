@@ -2,7 +2,7 @@
 The backbone of a MERN app inspired by the popular keychain toy. Take care of your virtual pet by feeding it, playing with it and cleaning up after it's little messes. 
 
 ### Front-end Deployed Site
-https://timagotchi.netlify.app/
+https://tim-agotchi.netlify.app/
 
 ## How to Install 
 1. Fork and clone this repo
