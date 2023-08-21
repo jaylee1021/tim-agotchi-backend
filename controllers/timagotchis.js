@@ -299,7 +299,7 @@ function sendEmail(toEmail, subject, message) {
 //----------------------ROUTES----------------------//
 
 //get all tims route
-router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.get('/', (req, res) => {
     Timagotchi.find({})
         .then(timagotchis => {
             return res.json(timagotchis);
@@ -311,7 +311,7 @@ router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => 
 });
 
 //get all timagotchis for a specific user
-router.get('/my-timagotchis/:userId', async (req, res) => {
+router.get('/my-timagotchis/:userId', passport.authenticate('jwt', { session: false }), async (req, res) => {
     Timagotchi.find({ user: req.params.userId })
         .then(timagotchis => {
             if (timagotchis) {
@@ -327,7 +327,7 @@ router.get('/my-timagotchis/:userId', async (req, res) => {
 });
 
 //get a tim by userId and timId
-router.get('/:timId', (req, res) => {
+router.get('/:timId', passport.authenticate('jwt', { session: false }), (req, res) => {
     Timagotchi.findOne({ _id: req.params.timId })
         .then(timagotchi => {
             if (timagotchi) {
@@ -343,7 +343,7 @@ router.get('/:timId', (req, res) => {
 });
 
 //create a new timagotchi
-router.post('/new', (req, res) => {
+router.post('/new', passport.authenticate('jwt', { session: false }), (req, res) => {
     let image;
     if (req.body.type === 'DOG') {
         image = 'https://i.imgur.com/V3oECuL.png';
@@ -368,7 +368,7 @@ router.post('/new', (req, res) => {
 });
 
 //delete a timagotchi
-router.delete('/:id', (req, res) => {
+router.delete('/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
     Timagotchi.findByIdAndDelete(req.params.id)
         .then(response => {
             return res.json({ message: 'Timagotchi Deleted' });

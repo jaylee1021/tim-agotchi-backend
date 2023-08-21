@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
 });
 
 // GET /users/:id
-router.get('/:id', (req, res) => {
+router.get('/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
     User.findById(req.params.id)
         .then(user => {
             if (user) {
@@ -110,7 +110,7 @@ router.post('/signup', (req, res) => {
 
 router.post('/login', async (req, res) => {
     // POST - finding a user and returning the user
-    
+
     const foundUser = await User.findOne({ email: req.body.email });
 
     if (foundUser) {
