@@ -16,7 +16,8 @@ const { Timagotchi, User } = require('../models');
 //degrades values. If you add 30
 const degradeValues = async () => {
 
-   try { const tims = await Timagotchi.find({});
+    try {
+        const tims = await Timagotchi.find({});
         for (i in tims) {
             let tim = tims[i];
             if (tim.food.value > 0) {
@@ -38,11 +39,11 @@ const degradeValues = async () => {
             evenOut(tim);
             await tim.save();
         }
-        
-   } catch (error) {
-       console.error('Error updating value:', error);
-   }
-}
+
+    } catch (error) {
+        console.error('Error updating value:', error);
+    }
+};
 
 const alterFriendship = async () => {
     try {
@@ -59,17 +60,17 @@ const alterFriendship = async () => {
                 await tim.save();
             }
             await checkFriendship(tim);
-        } 
+        }
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}
+};
 
 //decreasing food and mood value every second
 setInterval(async () => {
     try {
-        degradeValues()
-        alterFriendship()
+        degradeValues();
+        alterFriendship();
 
     } catch (error) {
         console.error('Error updating value:', error);
@@ -93,7 +94,7 @@ const checkAlive = async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}
+};
 
 const checkForEmail = async () => {
     try {
@@ -103,10 +104,19 @@ const checkForEmail = async () => {
             const tims = await Timagotchi.find({ user: user._id });
             for (let j = 0; j < tims.length; j++) {
                 const tim = tims[j];
+                let gender;
+                if (tim.gender === 'male') {
+                    gender = 'him';
+                } else {
+                    gender = 'her';
+                }
                 if (tim.food.value < 15 && tim.food.value > 0 && tim.alive) {
                     const toEmail = user.email;
                     const subject = 'Your Timagotchi is hungry!';
-                    const message = `${tim.name} is hungry! Please feed them!`;
+                    const message = `${tim.name} is hungry! Please feed ${gender}!
+                    <br/>
+                    <img src="${tim.image}" alt="${tim.name}"/>
+                    <a href="https://tim-agotchi.netlify.app/">Click here to feed ${tim.name}!</a> `;
                     sendEmail(toEmail, subject, message);
                 }
             }
@@ -114,7 +124,7 @@ const checkForEmail = async () => {
     } catch (error) {
         console.error('Error updating value:', error);
     }
-}
+};
 
 //play more?
 const playMore = async () => {
@@ -126,14 +136,14 @@ const playMore = async () => {
                 tim.food.status = "HUNGRY";
             }
             if (tim.mood.status < 50) {
-                tim.mood.status = "BORED"
+                tim.mood.status = "BORED";
             }
         }
     }
     catch (error) {
-        console.error('Error updating values less than 50', error)
+        console.error('Error updating values less than 50', error);
     }
-}
+};
 
 //setting functions to run every two hours
 setInterval(async () => {
@@ -289,7 +299,7 @@ function sendEmail(toEmail, subject, message) {
 //----------------------ROUTES----------------------//
 
 //get all tims route
-router.get('/', (req, res) => {
+router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
     Timagotchi.find({})
         .then(timagotchis => {
             return res.json(timagotchis);
